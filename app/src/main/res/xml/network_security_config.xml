@@ -2,6 +2,8 @@
 <network-security-config>
     <domain-config>
         <domain includeSubdomains="true">ashu.xyz</domain>
-        <pin digest="SHA-256">ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=</pin>
+        <pin-set>
+            <pin digest="SHA-256">ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=</pin>
+        </pin-set>
     </domain-config>
 </network-security-config>
