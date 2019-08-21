@@ -3,6 +3,8 @@ package xyz.ashu.testssl.network;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -11,7 +13,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
@@ -19,6 +21,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import xyz.ashu.demo11.R;
+import xyz.ashu.testssl.MyApplication;
 
 /**
  * <pre>
@@ -59,7 +63,8 @@ public class Api {
 
     private OkHttpClient getTrustAllClient() {
         OkHttpClient.Builder mBuilder = new OkHttpClient.Builder();
-        mBuilder.sslSocketFactory(createSSLSocketFactory(), mMyTrustManager)
+        SSLSocketFactory factory = createSSLSocketFactory();
+        mBuilder.sslSocketFactory(factory)
                 .hostnameVerifier(new TrustAllHostnameVerifier())
 //                .certificatePinner(new CertificatePinner.Builder()
 //                        .add("ashu.xyz", "sha256/ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=")
@@ -69,11 +74,26 @@ public class Api {
     }
 
     private SSLSocketFactory createSSLSocketFactory() {
+
+        TrustManagerFactory trustManagerFactory;
+        try {
+            InputStream resourceStream = MyApplication.getContext().getResources().openRawResource(R.raw.cert);
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(resourceStream, null);
+
+            String trustManagerAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
+            trustManagerFactory.init(keyStore);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
         SSLSocketFactory ssfFactory = null;
         try {
-            mMyTrustManager = new MyTrustManager();
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{mMyTrustManager}, new SecureRandom());
+            sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
             ssfFactory = sc.getSocketFactory();
         } catch (Exception ignored) {
             ignored.printStackTrace();
@@ -90,9 +110,6 @@ public class Api {
 
         @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            if (chain.length >= 1) {
-                chain[0].checkValidity();
-            }
         }
 
         @Override
