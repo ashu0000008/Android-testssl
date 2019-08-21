@@ -1,5 +1,7 @@
 package xyz.ashu.testssl.network;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -58,7 +60,11 @@ public class Api {
     private OkHttpClient getTrustAllClient() {
         OkHttpClient.Builder mBuilder = new OkHttpClient.Builder();
         mBuilder.sslSocketFactory(createSSLSocketFactory(), mMyTrustManager)
-                .hostnameVerifier(new TrustAllHostnameVerifier());
+                .hostnameVerifier(new TrustAllHostnameVerifier())
+//                .certificatePinner(new CertificatePinner.Builder()
+//                        .add("ashu.xyz", "sha256/ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=")
+//                        .build())
+        ;
         return mBuilder.build();
     }
 
@@ -84,6 +90,9 @@ public class Api {
 
         @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            if (chain.length >= 1) {
+                chain[0].checkValidity();
+            }
         }
 
         @Override
@@ -96,6 +105,7 @@ public class Api {
     private class TrustAllHostnameVerifier implements HostnameVerifier {
         @Override
         public boolean verify(String hostname, SSLSession session) {
+            Log.e("MyTrustManager verify:", hostname);
             return true;
         }
     }
