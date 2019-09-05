@@ -1,10 +1,6 @@
-package xyz.ashu.testssl.network;
-
-import android.util.Log;
+package xyz.ashu.app_okhttp_pinning.network;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -13,7 +9,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
@@ -22,8 +18,6 @@ import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import xyz.ashu.demo11.R;
-import xyz.ashu.testssl.MyApplication;
 
 /**
  * <pre>
@@ -64,8 +58,7 @@ public class Api {
 
     private OkHttpClient getTrustAllClient() {
         OkHttpClient.Builder mBuilder = new OkHttpClient.Builder();
-        SSLSocketFactory factory = createSSLSocketFactory();
-        mBuilder.sslSocketFactory(factory)
+        mBuilder.sslSocketFactory(createSSLSocketFactory(), mMyTrustManager)
                 .hostnameVerifier(new TrustAllHostnameVerifier())
                 .certificatePinner(new CertificatePinner.Builder()
                         .add("ashu.xyz", "sha256/ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=")
@@ -75,26 +68,11 @@ public class Api {
     }
 
     private SSLSocketFactory createSSLSocketFactory() {
-
-        TrustManagerFactory trustManagerFactory;
-        try {
-            InputStream resourceStream = MyApplication.getContext().getResources().openRawResource(R.raw.cert);
-            String keyStoreType = KeyStore.getDefaultType();
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(resourceStream, null);
-
-            String trustManagerAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-            trustManagerFactory = TrustManagerFactory.getInstance(trustManagerAlgorithm);
-            trustManagerFactory.init(keyStore);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-
         SSLSocketFactory ssfFactory = null;
         try {
+            mMyTrustManager = new MyTrustManager();
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
+            sc.init(null, new TrustManager[]{mMyTrustManager}, new SecureRandom());
             ssfFactory = sc.getSocketFactory();
         } catch (Exception ignored) {
             ignored.printStackTrace();
@@ -123,7 +101,6 @@ public class Api {
     private class TrustAllHostnameVerifier implements HostnameVerifier {
         @Override
         public boolean verify(String hostname, SSLSession session) {
-            Log.e("MyTrustManager verify:", hostname);
             return true;
         }
     }

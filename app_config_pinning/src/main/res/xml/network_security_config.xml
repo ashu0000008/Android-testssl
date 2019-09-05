@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config>
+    <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">ashu.xyz</domain>
-        <pin-set>
+        <pin-set expiration="2019-11-14">
             <pin digest="SHA-256">ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIba=</pin>
         </pin-set>
     </domain-config>
