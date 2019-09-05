@@ -87,9 +87,14 @@ public class Api {
 
         @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            String sha256 = CertUtil.getSHA256FromSert2(chain[0]);
-            Log.e("checkServerTrusted", "authType:" + authType + "----sha256:" + sha256);
 
+            X509Certificate cert = chain[0];
+            //检测证书是否合法，比如过期
+            cert.checkValidity();
+
+            //检测证书是不是目标证书
+            String sha256 = CertUtil.getSHA256FromSert2(cert);
+            Log.e("checkServerTrusted", "authType:" + authType + "----sha256:" + sha256);
             if (!"ZXlgxEjyJdFPhcbbXQ3VOiAQK3uYMUUI24yj6+2oIbg=".equals(sha256)) {
                 throw new CertificateException("cert can not trusted!");
             }
