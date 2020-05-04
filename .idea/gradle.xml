@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/app_checkservertrusted" />
             <option value="$PROJECT_DIR$/app_config_pinning" />
             <option value="$PROJECT_DIR$/app_okhttp_pinning" />
+            <option value="$PROJECT_DIR$/test_tinker" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
