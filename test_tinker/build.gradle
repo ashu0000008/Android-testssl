@@ -10,8 +10,8 @@ android {
         applicationId "xyz.ashu.test_tinker"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode generateVersionCode()
+        versionName "1.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -23,6 +23,18 @@ android {
         }
     }
 
+}
+
+static def generateVersionCode() {
+    def result = "git rev-list HEAD --count".execute().text.trim()
+    if (result.empty) throw new RuntimeException("Could not generate versioncode on this platform? Cmd output: ${result.text}")
+    return result.toInteger()
+}
+
+static def generateLastGitCommitId() {
+    def result = "git rev-parse --short HEAD".execute().text.trim()
+    if (result.empty) throw new RuntimeException("Could not generate versioncode on this platform? Cmd output: ${result.text}")
+    return result.toString()
 }
 
 dependencies {
