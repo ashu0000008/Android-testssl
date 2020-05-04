@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         mTvHello.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mTvHello.setText("原始信息");
                 getSomething();
             }
         });
